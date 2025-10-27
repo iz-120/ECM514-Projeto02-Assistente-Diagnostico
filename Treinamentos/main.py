@@ -1,7 +1,7 @@
 import pandas as pd
 import yaml
 from sklearn.model_selection import train_test_split
-from src.train import treinar, treinar_optnua
+# from src.train import treinar, treinar_optnua
 from src.utils import carregar_dados_dengue_de_release
 
 #==============================INPUT==================================================
@@ -46,11 +46,11 @@ print(df_dengue['RISCO_GRAVIDADE_grave'].value_counts(normalize=True))
 print("Reduzido:")
 print(df_dengue_reduzido['RISCO_GRAVIDADE_grave'].value_counts(normalize=True))
 
-# Roda os experimentos
-if use_gridsearch:
-    # Roda experimentos com GridSearch
-    _, _, _ = treinar_gridsearch(df_dengue_reduzido, target, config)
+# # Roda os experimentos
+# if use_gridsearch:
+#     # Roda experimentos com GridSearch
+#     _, _, _ = treinar_gridsearch(df_dengue_reduzido, target, config)
 
-if use_optuna:
-    # Roda experimentos com Optuna
-    _, _, _ = treinar_optuna(df_dengue_reduzido, target, config)
+# if use_optuna:
+#     # Roda experimentos com Optuna
+#     _, _, _ = treinar_optuna(df_dengue_reduzido, target, config)
