@@ -1,0 +1,18 @@
+model:
+  type: 'LightGBM'
+  param_format: 'grid'
+  params:
+    n_estimators: [100, 200, 500]
+    max_depth: [3, 6, 10, -1]   # -1 para sem limite
+    learning_rate: [0.01, 0.1, 0.2]
+    num_leaves: [31, 63, 127]
+    feature_fraction: [0.7, 0.9, 1.0]
+    bagging_fraction: [0.7, 0.9, 1.0]
+    bagging_freq: [0, 1, 5]
+
+train:
+  test_size: 0.2
+  cv: 3
+  random_state: 42
+
+file: 'lgbm_grid_1'
