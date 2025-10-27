@@ -38,13 +38,7 @@ df_dengue = carregar_dados_dengue_de_release(
 df_dengue = df_dengue.dropna()
 
 # Cria df reduzido
-df_dengue_reduzido, _ = train_test_split(df_dengue, train_size=frac, stratify=df_dengue['RISCO_GRAVIDADE_grave'], random_state=42)
-
-# Verificar proporções
-print("Original:")
-print(df_dengue['RISCO_GRAVIDADE_grave'].value_counts(normalize=True))
-print("Reduzido:")
-print(df_dengue_reduzido['RISCO_GRAVIDADE_grave'].value_counts(normalize=True))
+df_dengue_reduzido = pd.read_csv('Treinamentos/data/df_dengue_reduzido_20.csv')
 
 # # Roda os experimentos
 # if use_gridsearch:
