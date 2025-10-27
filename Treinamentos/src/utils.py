@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import wandb
+import requests
+import zipfile
+from io import BytesIO
 
 # ==============================================================================
 # CARREGA OS DADOS UTILIZADOS
@@ -50,6 +53,9 @@ def carregar_dados_dengue_de_release(url_release: str, ficheiro_csv_no_zip: str)
         print(f"Ocorreu um erro inesperado: {e}")
         return pd.DataFrame()
 
+# ==============================================================================
+# PLOTA GRÁFICOS DE REAL VC PREVISTO
+# ==============================================================================
 def plotar_real_vs_previsto(datas, y_real, y_previsto, produto_nome, tipo_modelo, tuning, file):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=datas, y=y_real, mode='lines+markers', name='Real', line=dict(color='blue', width=2)))
