@@ -151,16 +151,6 @@ def avaliar_modelo_completo(y_true, y_pred, y_pred_proba=None, nome_modelo="Mode
             "visualizacoes/pr_curve": wandb.Image(plt)
         })
         plt.close()
-        
-        # Criar tabela de classificação para wandb
-        pred_df = pd.DataFrame({
-            'True': y_true,
-            'Predicted': y_pred,
-            'Prob_Grave': y_pred_proba
-        })
-        wandb.log({
-            "tabelas/predicoes": wandb.Table(dataframe=pred_df)
-        })
     
     # Resumo de métricas em uma única tabela
     metricas_table = pd.DataFrame({

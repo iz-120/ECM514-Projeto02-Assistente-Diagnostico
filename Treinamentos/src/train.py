@@ -6,9 +6,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import learning_curve, cross_val_score
-from sklearn.metrics import mean_absolute_error, root_mean_squared_error, mean_absolute_percentage_error, r2_score
 from src.models import criar_modelo, aplica_parametros
-from src.utils import define_train_test, avaliar_modelo_completo, plot_confusion_matrix
+from src.utils import define_train_test, avaliar_modelo_completo
 import plotly.graph_objects as go
 import xgboost as xgb
 import lightgbm as lgb
