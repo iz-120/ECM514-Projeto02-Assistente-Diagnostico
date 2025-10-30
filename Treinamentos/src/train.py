@@ -20,6 +20,9 @@ def treinar_gridsearch(df_dengue, target, config, init):
     # Inicia run
     wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
     
+    # Log do método de otimização
+    wandb.log({"Otimização": "GridSearchCV"})
+    
     # Define grupos de treino e teste
     X_train, X_test, y_train, y_test = define_train_test(df_dengue, target, config=config)
     
@@ -128,6 +131,9 @@ def treinar_optuna(df_dengue, target, config, init):
     """
     # Inicia run
     wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
+    
+    # Log do método de otimização
+    wandb.log({"Otimização": "Optuna"})
     
     # Define grupos de treino e teste
     X_train, X_test, y_train, y_test = define_train_test(df_dengue, target, config=config)
