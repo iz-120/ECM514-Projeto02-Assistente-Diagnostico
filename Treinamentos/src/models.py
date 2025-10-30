@@ -9,7 +9,8 @@ def criar_modelo(model_type, random_state=None):
     if model_type.lower() in ['randomforest', 'randomforestregressor']:
         return RandomForestRegressor(random_state=random_state)
     elif model_type.lower() in ['xgbregressor', 'xgboost']:
-        return xgb.XGBRegressor(random_state=random_state)
+        return xgb.XGBRegressor(random_state=random_state,
+                                tree_method='hist')
     elif model_type.lower() in ['lgbmregressor', 'lightgbm']:
         return lgb.LGBMRegressor(random_state=random_state)
     else:
@@ -18,7 +19,8 @@ def criar_modelo(model_type, random_state=None):
 def aplica_parametros(modelo_base, config):
     if config['model']['param_format'].lower() in ['grid', 'gridsearch', 'gridsearchcv']:
         return GridSearchCV(modelo_base, param_grid=config['model']['params'],
-                          cv=config['train']['cv'], scoring='neg_mean_absolute_error', n_jobs=-1)
+                          cv=config['train']['cv'], scoring='neg_mean_absolute_error',
+                          n_jobs=2)
     elif config['model']['param_format'].lower() in ['simple', 'finetuning']:
         return modelo_base(
             n_estimators=config['model']['params']['n_estimators'],

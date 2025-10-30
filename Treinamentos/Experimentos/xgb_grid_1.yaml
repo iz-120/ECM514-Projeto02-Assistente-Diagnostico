@@ -2,9 +2,9 @@ model:
   type: 'XGBoost'
   param_format: 'grid'
   params:
-    n_estimators: [100, 200, 500]
-    max_depth: [3, 6, 10]
-    learning_rate: [0.01, 0.1, 0.2]
+    n_estimators: [100, 200]
+    max_depth: [3, 4, 5]
+    learning_rate: [0.01, 0.1]
     subsample: [0.7, 0.9, 1.0]
     colsample_bytree: [0.7, 0.9, 1.0]
     gamma: [0, 0.1, 0.2]
