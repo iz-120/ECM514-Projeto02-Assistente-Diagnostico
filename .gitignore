@@ -1,0 +1,5 @@
+# Ignora pycache
+__pycache__/
+
+# Ignora wandb
+wandb/
