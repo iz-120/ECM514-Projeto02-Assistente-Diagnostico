@@ -12,25 +12,12 @@ import plotly.graph_objects as go
 import xgboost as xgb
 import lightgbm as lgb
 
-def treinar_produto(df_produto, target, datas, produto_nome, config, data_inicio=None, num_meses_previsao=None):
+def treinar_gridsearch(df_dengue, target, config, init):
     # Inicia run
-    wandb.init(project="Demanda_Farmaceutica_v2", tags=['v2', 'testes'], config=config, name=f"{produto_nome}")
+    wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
     
     # Define grupos de treino e teste
-    if data_inicio is not None and num_meses_previsao is not None:
-        X_train, X_test, y_train, y_test, datas_test = define_train_test(df_produto, target, datas, data_inicio=data_inicio, num_meses_previsao=num_meses_previsao)
-        # Loga data de início da previsão e número de meses que foram previstos
-        wandb.log({
-            "Data_Inicio_Previsao": data_inicio,
-            "Num_Meses_Previsao": num_meses_previsao
-        })
-    else:
-        X_train, X_test, y_train, y_test, datas_test = define_train_test(df_produto, target, datas, config=config)
-        # Loga data de início da previsão e número de meses que foram previstos
-        wandb.log({
-            "Data_Inicio_Previsao": datas_test['DATA'].iloc[0],
-            "Num_Meses_Previsao": len(datas_test)
-        })
+    X_train, X_test, y_train, y_test = define_train_test(df_dengue, target, config=config)
 
     
     # Seleciona o modelo
@@ -59,11 +46,11 @@ def treinar_produto(df_produto, target, datas, produto_nome, config, data_inicio
     best_score = modelo.best_score_
 
     wandb.log({"MAE": mae, "RMSE": rmse, "MAPE": mape, "wMAPE": wmape, "sMAPE": smape, 
-               "R²": r2, "BIAS": bias, "StdE": stde, "Best Score": best_score, "tempo_treino": tempo_treino,
+               "R²": r2, "BIAS": bias, "StdE": stde, "Best Score": best_score, "Tempo Treino": tempo_treino,
                "CPU (%)": psutil.cpu_percent(), "Memória (%)": psutil.virtual_memory().percent})
 
-    df_resultado = pd.DataFrame({"DATA": datas_test, "QUANTIDADE_REAL": y_test, "QUANTIDADE_PREVISTA": y_pred})
-    plotar_real_vs_previsto(df_resultado['DATA'], df_resultado['QUANTIDADE_REAL'], df_resultado['QUANTIDADE_PREVISTA'], produto_nome, config['model']['type'],  config['model']['type'], config['model']['param_format'], config['file'])
+    df_resultado = pd.DataFrame({"QUANTIDADE_REAL": y_test, "QUANTIDADE_PREVISTA": y_pred})
+    # plotar_real_vs_previsto(df_resultado['DATA'], df_resultado['QUANTIDADE_REAL'], df_resultado['QUANTIDADE_PREVISTA'], produto_nome, config['model']['type'],  config['model']['type'], config['model']['param_format'], config['file'])
 
     # Curva de aprendizado
     train_sizes, train_scores, test_scores = learning_curve(modelo.best_estimator_, X_train, y_train, cv=3,
@@ -71,49 +58,36 @@ def treinar_produto(df_produto, target, datas, produto_nome, config, data_inicio
     fig_curve = go.Figure()
     fig_curve.add_trace(go.Scatter(x=train_sizes, y=-np.mean(train_scores, axis=1), mode='lines+markers', name="Treino"))
     fig_curve.add_trace(go.Scatter(x=train_sizes, y=-np.mean(test_scores, axis=1), mode='lines+markers', name="Validação"))
-    fig_curve.update_layout(title=f"Curva de Aprendizado - {produto_nome}", xaxis_title="Nº de amostras", yaxis_title="MAE")
-    wandb.log({f"Curva_Aprendizado_{produto_nome}": fig_curve})
+    fig_curve.update_layout(title=f"Curva de Aprendizado - {init['df_name']}", xaxis_title="Nº de amostras", yaxis_title="MAE")
+    wandb.log({f"Curva_Aprendizado_{init['df_name']}": fig_curve})
 
     # Importância das features
     importances = modelo.best_estimator_.feature_importances_
     features = X_train.columns
     df_import = pd.DataFrame({"Feature": features, "Importância": importances}).sort_values("Importância", ascending=False)
     fig_imp = go.Figure(go.Bar(x=df_import["Importância"], y=df_import["Feature"], orientation="h"))
-    fig_imp.update_layout(title=f"Importância das Variáveis - {produto_nome}")
-    wandb.log({f"Importancia_Variaveis_{produto_nome}": fig_imp})
+    fig_imp.update_layout(title=f"Importância das Variáveis - {init['df_name']}")
+    wandb.log({f"Importancia_Variaveis_{init['df_name']}": fig_imp})
 
     # Log dos hiperparâmetros que geraram o melhor modelo (se input for em grid)
     wandb.log(modelo.best_params_)
 
     # Registro do dataset no W&B sem symlink
-    path_df = 'Modelos/data/df_produto.csv'
-    artifact = wandb.Artifact("df_produto", type="dataset")
-    df_produto.to_csv(path_df, index=False)
+    path_df = 'Treinamentos/data/'+{init['df_name']}+'.csv'
+    artifact = wandb.Artifact("df_dengue", type="dataset")
+    df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)
     wandb.log_artifact(artifact)
 
     wandb.finish()
     return modelo, df_resultado, df_import
 
-def treinar_produto_optuna(df_produto, target, datas, produto_nome, config, data_inicio=None, num_meses_previsao=None):
+def treinar_optuna(df_dengue, target, config, init):
     # Inicia run
-    wandb.init(project="Demanda_Farmaceutica", tags=['v2', 'testes', 'target_quant'], config=config, name=f"{produto_nome}")
+    wandb.init(project=init['project_name'], tags=init['tags'], config=config)
     
     # Define grupos de treino e teste
-    if data_inicio is not None and num_meses_previsao is not None:
-        X_train, X_test, y_train, y_test, datas_test = define_train_test(df_produto, target, datas, data_inicio=data_inicio, num_meses_previsao=num_meses_previsao)
-        # Loga data de início da previsão e número de meses que foram previstos
-        wandb.log({
-            "Data_Inicio_Previsao": data_inicio,
-            "Num_Meses_Previsao": num_meses_previsao
-        })
-    else:
-        X_train, X_test, y_train, y_test, datas_test = define_train_test(df_produto, target, datas, config=config)
-        # Loga data de início da previsão e número de meses que foram previstos
-        wandb.log({
-            "Data_Inicio_Previsao": datas_test.iloc[0],
-            "Num_Meses_Previsao": len(datas_test)
-        })
+    X_train, X_test, y_train, y_test = define_train_test(df_dengue, target, config=config)
 
     
     # Definição do tipo de modelo
@@ -189,8 +163,9 @@ def treinar_produto_optuna(df_produto, target, datas, produto_nome, config, data
                "R²": r2, "BIAS": bias, "StdE": stde, "Best Score": best_score, "tempo_treino": tempo_treino,
                "CPU (%)": psutil.cpu_percent(), "Memória (%)": psutil.virtual_memory().percent})
 
-    df_resultado = pd.DataFrame({"DATA": datas_test, "QUANTIDADE_REAL": y_test, "QUANTIDADE_PREVISTA": y_pred})
-    plotar_real_vs_previsto(df_resultado['DATA'], df_resultado['QUANTIDADE_REAL'], df_resultado['QUANTIDADE_PREVISTA'], produto_nome, config['model']['type'], 'optuna', config['file'])
+# REVER PLOTS
+    df_resultado = pd.DataFrame({"QUANTIDADE_REAL": y_test, "QUANTIDADE_PREVISTA": y_pred})
+    # plotar_real_vs_previsto(df_resultado['DATA'], df_resultado['QUANTIDADE_REAL'], df_resultado['QUANTIDADE_PREVISTA'], produto_nome, config['model']['type'], 'optuna', config['file'])
 
     # Curva de aprendizado
     train_sizes, train_scores, test_scores = learning_curve(modelo, X_train, y_train, cv=3,
@@ -198,25 +173,25 @@ def treinar_produto_optuna(df_produto, target, datas, produto_nome, config, data
     fig_curve = go.Figure()
     fig_curve.add_trace(go.Scatter(x=train_sizes, y=-np.mean(train_scores, axis=1), mode='lines+markers', name="Treino"))
     fig_curve.add_trace(go.Scatter(x=train_sizes, y=-np.mean(test_scores, axis=1), mode='lines+markers', name="Validação"))
-    fig_curve.update_layout(title=f"Curva de Aprendizado - {produto_nome}", xaxis_title="Nº de amostras", yaxis_title="MAE")
-    wandb.log({f"Curva_Aprendizado_{produto_nome}": fig_curve})
+    fig_curve.update_layout(title=f"Curva de Aprendizado - {init['df_name']}", xaxis_title="Nº de amostras", yaxis_title="MAE")
+    wandb.log({f"Curva_Aprendizado_{init['df_name']}": fig_curve})
 
     # Importância das features
     importances = modelo.feature_importances_
     features = X_train.columns
     df_import = pd.DataFrame({"Feature": features, "Importância": importances}).sort_values("Importância", ascending=False)
     fig_imp = go.Figure(go.Bar(x=df_import["Importância"], y=df_import["Feature"], orientation="h"))
-    fig_imp.update_layout(title=f"Importância das Variáveis - {produto_nome}")
-    wandb.log({f"Importancia_Variaveis_{produto_nome}": fig_imp})
+    fig_imp.update_layout(title=f"Importância das Variáveis - {init['df_name']}")
+    wandb.log({f"Importancia_Variaveis_{init['df_name']}": fig_imp})
 
     # Log dos hiperparâmetros que geraram o melhor modelo (se input for em grid)
     wandb.log(modelo.get_params())
     
 
     # Registro do dataset no W&B sem symlink
-    path_df = 'Modelos/data/df_produto.csv'
-    artifact = wandb.Artifact("df_produto", type="dataset")
-    df_produto.to_csv(path_df, index=False)
+    path_df = 'Treinamentos/data/'+{init['df_name']}+'.csv'
+    artifact = wandb.Artifact("df_dengue", type="dataset")
+    df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)
     wandb.log_artifact(artifact)
 
