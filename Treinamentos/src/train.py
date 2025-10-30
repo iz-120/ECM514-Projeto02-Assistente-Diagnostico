@@ -73,7 +73,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     wandb.log(modelo.best_params_)
 
     # Registro do dataset no W&B sem symlink
-    path_df = 'Treinamentos/data/'+{init['df_name']}+'.csv'
+    path_df = 'Treinamentos/data/'+init['df_name']+'.csv'
     artifact = wandb.Artifact("df_dengue", type="dataset")
     df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)
@@ -189,7 +189,7 @@ def treinar_optuna(df_dengue, target, config, init):
     
 
     # Registro do dataset no W&B sem symlink
-    path_df = 'Treinamentos/data/'+{init['df_name']}+'.csv'
+    path_df = 'Treinamentos/data/'+init['df_name']+'.csv'
     artifact = wandb.Artifact("df_dengue", type="dataset")
     df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)
