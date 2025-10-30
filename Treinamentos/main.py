@@ -2,7 +2,6 @@ import pandas as pd
 import yaml
 from sklearn.model_selection import train_test_split
 from src.train import treinar_gridsearch, treinar_optuna
-from src.utils import carregar_dados_dengue_de_release
 
 #==============================INPUT==================================================
 # Configurações gerais
