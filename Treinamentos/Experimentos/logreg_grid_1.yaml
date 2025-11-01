@@ -2,7 +2,6 @@ model:
   type: 'Logistic_Regression'
   param_format: 'grid'
   params:
-    class_weight: ['balanced']
     solver: ['liblinear', 'saga']
     max_iter: [1000]
     penalty: ['l1', 'l2']

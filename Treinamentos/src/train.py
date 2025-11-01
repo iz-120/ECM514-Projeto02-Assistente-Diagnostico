@@ -97,7 +97,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     except Exception:
         clf_inside = getattr(modelo, 'best_estimator_', modelo)
 
-    if hasattr(clf_inside, 'feature_importances_'):
+    if hasattr(clf_inside, 'feature_importances_') and config['model']['type'].lower() not in ['logistic', 'logisticregression', 'logistic_regression']:
         importances = clf_inside.feature_importances_
         features = X_train.columns
         df_import = pd.DataFrame({

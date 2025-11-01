@@ -20,9 +20,8 @@ def criar_modelo(config):
     elif config['model']['type'].lower() in ['logistic', 'logisticregression', 'logistic_regression']:
         return LogisticRegression(
             random_state=config['train']['random_state'],
-            class_weight=config['model']['params']['class_weight'],
+            n_iter=config['model']['params']['n_iter'],
             solver=config['model']['params']['solver'],
-            max_iter=config['model']['params']['max_iter'],
             penalty=config['model']['params']['penalty'],
             C=config['model']['params']['C']
         )
