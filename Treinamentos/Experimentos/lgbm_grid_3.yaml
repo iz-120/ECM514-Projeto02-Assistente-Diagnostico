@@ -15,7 +15,7 @@ model:
   fixed_params:
     objective: "binary"
     boosting_type: "gbdt"
-    metric: "auc"
+    metric: "recall"
     class_weight: "balanced"
     verbose: -1
 

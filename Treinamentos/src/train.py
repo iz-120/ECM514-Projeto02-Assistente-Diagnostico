@@ -193,8 +193,9 @@ def treinar_optuna(df_dengue, target, config, init):
                 "feature_fraction": trial.suggest_categorical("feature_fraction", config['model']['params']["feature_fraction"]),
                 "bagging_fraction": trial.suggest_categorical("bagging_fraction", config['model']['params']["bagging_fraction"]),
                 "bagging_freq": trial.suggest_categorical("bagging_freq", config['model']['params']["bagging_freq"]),
+                "class_weight": config['model']['fixed_params']["class_weight"],
                 "random_state": config['train']['random_state'],
-                "objective": "binary"
+                "objective": config['model']['fixed_params']["objective"],
             }
             base = criar_modelo(config)
             model = base.set_params(**trial_params)

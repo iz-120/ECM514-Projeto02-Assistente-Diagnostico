@@ -7,21 +7,21 @@ from src.nn_model import treinar_nn
 # Configurações gerais
 init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
-    'tags': ['teste'],
+    'tags': ['teste', '5%'],
     'name': 'Dengue_v5',
     'df_name': 'df_dengue_reduzido_5'
 }
 
 # Seleciona experimento
-yaml_file = "logreg_grid_2"
+yaml_file = "lgbm_grid_3"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
-use_gridsearch = True
-use_optuna = False
+use_gridsearch = False
+use_optuna = True
 use_nn = False 
 
 #=====================================================================================
