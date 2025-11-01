@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import wandb
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, average_precision_score, roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -192,21 +193,17 @@ def define_train_test(df_dengue, target, config):
     -------
     X_train, X_test, y_train, y_test : pd.DataFrame, pd.DataFrame, pd.Series, pd.Series
     """
+    # Definir X (features) e y (alvo)
+    X = df_dengue.drop('RISCO_GRAVIDADE_grave', axis=1)
+    y = df_dengue['RISCO_GRAVIDADE_grave']
+
     # SPLIT PERCENTUAL
-    if config is None:
-        raise ValueError("É necessário fornecer 'config[train][test_size]' para usar split percentual.")
-
-    split = int(len(df_dengue) * (1 - config['train']['test_size']))
-    df_train, df_test = df_dengue.iloc[:split], df_dengue.iloc[split:]
-
-    # -------------------------
-    # Definição de X e y
-    # -------------------------
-    X_train = df_train.drop(columns=[target]).apply(pd.to_numeric, errors='coerce')
-    y_train = df_train[target]
-
-    X_test = df_test.drop(columns=[target]).apply(pd.to_numeric, errors='coerce')
-    y_test = df_test[target]
+    X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+    )
 
     return X_train, X_test, y_train, y_test
 
