@@ -1,0 +1,22 @@
+model:
+  type: 'Logistic_Regression'
+  param_format: 'grid'
+  params:
+    solver: ['saga']
+    max_iter: [1000]
+    penalty: ['l1']
+    C: [0.001]
+
+train:
+  test_size: 0.2
+  cv: 3
+  random_state: 42
+
+cross_val:
+  n_jobs: -1
+  scoring: 'recall'
+  refit: 'recall'
+  verbose: 2
+  n_trials: 8
+
+file: 'logreg_grid_2'

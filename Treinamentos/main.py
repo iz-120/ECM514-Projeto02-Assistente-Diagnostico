@@ -13,7 +13,7 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "logreg_grid_1"
+yaml_file = "logreg_grid_2"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
