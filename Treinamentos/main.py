@@ -7,19 +7,19 @@ from src.train import treinar_gridsearch, treinar_optuna
 init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
     'tags': ['teste'],
-    'name': 'Dengue_v1',
+    'name': 'Dengue_v2',
     'df_name': 'df_dengue_reduzido_1'
 }
 
 # Seleciona experimento
-yaml_file = "lgbm_grid_2"
+yaml_file = "xgb_grid_2"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
-use_gridsearch = True
+use_gridsearch = False
 use_optuna = True
 
 #=====================================================================================

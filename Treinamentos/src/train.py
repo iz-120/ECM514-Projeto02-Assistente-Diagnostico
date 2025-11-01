@@ -19,6 +19,10 @@ def treinar_gridsearch(df_dengue, target, config, init):
     # Inicia run
     wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
     
+    # Flatten config e atualiza wandb.config para melhor visualização
+    flattened_config = flatten_config(config)
+    wandb.config.update(flattened_config)
+    
     # Log do método de otimização
     wandb.log({"Otimização": "GridSearchCV"})
     
@@ -131,6 +135,10 @@ def treinar_optuna(df_dengue, target, config, init):
     # Inicia run
     wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
     
+    # Flatten config e atualiza wandb.config para melhor visualização
+    flattened_config = flatten_config(config)
+    wandb.config.update(flattened_config)
+    
     # Log do método de otimização
     wandb.log({"Otimização": "Optuna"})
     
@@ -155,7 +163,7 @@ def treinar_optuna(df_dengue, target, config, init):
                 "gamma": trial.suggest_categorical("gamma", config['model']['params']["gamma"]),
                 "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", config['model']['params']["scale_pos_weight"]),
                 "random_state": config['train']['random_state'],
-                "objective": "binary:logistic"  # Alterado para classificação binária
+                "objective": "binary:logistic"
             }
             base = criar_modelo(config)
             model = base.set_params(**trial_params)

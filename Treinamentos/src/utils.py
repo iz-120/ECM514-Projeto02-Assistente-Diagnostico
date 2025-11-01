@@ -209,3 +209,21 @@ def define_train_test(df_dengue, target, config):
     y_test = df_test[target]
 
     return X_train, X_test, y_train, y_test
+
+
+# ==============================================================================
+# REMOVE ANINHAMENTO DOS PARÂMETROS EM CONFIG NO WANDB
+# ==============================================================================
+def flatten_config(cfg, parent_key='', sep='_'):
+    """
+    Flatten um dicionário aninhado, concatenando as chaves com o separador especificado.
+    Ex: {'model': {'params': {'learning_rate': 0.1}}} -> {'model_params_learning_rate': 0.1}
+    """
+    items = []
+    for k, v in cfg.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_config(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
