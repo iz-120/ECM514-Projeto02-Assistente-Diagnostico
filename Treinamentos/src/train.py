@@ -172,11 +172,11 @@ def treinar_optuna(df_dengue, target, config, init):
                 "gamma": trial.suggest_categorical("gamma", config['model']['params']["gamma"]),
                 "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", config['model']['params']["scale_pos_weight"]),
                 "random_state": config['train']['random_state'],
-                "objective": "binary:logistic"
+                "objective": config['model']['fixed_params']["objective"]
             }
             base = criar_modelo(config)
             model = base.set_params(**trial_params)
-            # wrap model into pipeline that applies MinMax scaling and SMOTE
+            # wrap model into pipeline that applies scaling and SMOTE
             pipeline = ImbPipeline([
                 ('scaler', StandardScaler()),
                 ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
