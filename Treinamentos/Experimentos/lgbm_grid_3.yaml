@@ -1,22 +1,27 @@
 model:
-  type: 'LightGBM'
-  param_format: 'grid'
+  type: "LightGBM"
+  param_format: "grid"
   params:
-    n_estimators: [50, 100, 200]    # poucas árvores
-    max_depth: [3, 4, 5]             # evita overfitting
-    learning_rate: [0.05, 0.1]      # padrão para começar
-    num_leaves: [4, 6, 8]            # pequeno, compatível com poucos dados
-    min_data_in_leaf: [5, 10, 15]   # garante que cada folha tenha dados suficientes
-    feature_fraction: [0.8, 1.0]    # menos agressivo
-    bagging_fraction: [0.8]          # leve subsampling se quiser
-    bagging_freq: [1]
+    n_estimators: [100, 200, 400]
+    max_depth: [3, 5, 7]
+    learning_rate: [0.01, 0.05, 0.1]
+    num_leaves: [7, 15, 31]
+    min_data_in_leaf: [5, 10, 20]
+    feature_fraction: [0.6, 0.8, 1.0]
+    bagging_fraction: [0.6, 0.8, 1.0]
+    bagging_freq: [0, 1]
+    reg_alpha: [0.0, 0.1, 1.0]
+    reg_lambda: [0.0, 0.1, 1.0]
   fixed_params:
-    objective: 'binary'
-    class_weight: 'balanced'
+    objective: "binary"
+    boosting_type: "gbdt"
+    metric: "auc"
+    class_weight: "balanced"
+    verbose: -1
 
 train:
   test_size: 0.2
   cv: 3
   random_state: 42
 
-file: 'lgbm_grid_3'
+file: "lgbm_grid_3"
