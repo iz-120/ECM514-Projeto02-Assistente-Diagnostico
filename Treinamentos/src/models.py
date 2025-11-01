@@ -4,50 +4,43 @@ import optuna
 import xgboost as xgb
 import lightgbm as lgb
 
-def criar_modelo(model_type, random_state=None):
+def criar_modelo(config):
     """
     Instancia modelo a partir do tipo informado no YAML.
     Todos os modelos são configurados para classificação binária.
     """
-    if model_type.lower() in ['randomforest', 'randomforestclassifier']:
+    if config['model']['type'].lower() in ['randomforest', 'randomforestclassifier']:
         from sklearn.ensemble import RandomForestClassifier
         return RandomForestClassifier(
-            random_state=random_state,
+            random_state=config['train']['random_state'],
             class_weight='balanced'  # Lida com desbalanceamento
         )
-    elif model_type.lower() in ['xgbclassifier', 'xgboost']:
+    elif config['model']['type'].lower() in ['xgbclassifier', 'xgboost']:
         return xgb.XGBClassifier(
-            random_state=random_state,
+            random_state=config['train']['random_state'],
             tree_method='hist',
-            scale_pos_weight=1,  # Ajustar baseado no desbalanceamento
+            scale_pos_weight=config['model']['scale_pos_weight'],  # Ajustar baseado no desbalanceamento
             objective='binary:logistic'
         )
-    elif model_type.lower() in ['lgbmclassifier', 'lightgbm']:
+    elif config['model']['type'].lower() in ['lgbmclassifier', 'lightgbm']:
         return lgb.LGBMClassifier(
-            random_state=random_state,
+            random_state=config['train']['random_state'],
             objective='binary',
-            class_weight='balanced'
+            class_weight='balanced',
         )
     else:
-        raise ValueError(f"Modelo {model_type} não suportado")
+        raise ValueError(f"Modelo {config['model']['type']} não suportado")
     
 def aplica_parametros(modelo_base, config):
-    if config['model']['param_format'].lower() in ['grid', 'gridsearch', 'gridsearchcv']:
-        # Define múltiplos scorings para classificação
-        scoring = {
-            'roc_auc': 'roc_auc',           # Área sob a curva ROC
-            'f1': 'f1',                      # Equilíbrio entre precisão e recall
-            'bal_acc': 'balanced_accuracy'   # Média entre sensibilidade e especificidade
-        }
-        
+    if config['model']['param_format'].lower() in ['grid', 'gridsearch', 'gridsearchcv']:        
         return GridSearchCV(
             modelo_base,
             param_grid=config['model']['params'],
             cv=config['train']['cv'],
-            scoring=scoring,
-            refit='roc_auc',  # Usa ROC AUC para selecionar melhor modelo
-            n_jobs=2,
-            verbose=1,
+            scoring=config['grid_search']['scoring'],
+            refit=config['grid_search']['refit'],
+            n_jobs=config['grid_search']['n_jobs'],
+            verbose=config['grid_search']['verbose'],
             return_train_score=True
         )
     elif config['model']['param_format'].lower() in ['simple', 'finetuning']:

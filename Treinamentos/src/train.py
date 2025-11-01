@@ -32,7 +32,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     })
     
     # Seleciona e configura o modelo base
-    modelo_base = criar_modelo(config['model']['type'], random_state=config['train']['random_state'])
+    modelo_base = criar_modelo(config)
     modelo = aplica_parametros(modelo_base, config)
 
     # Treina e mede tempo
@@ -60,7 +60,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     # Curva de aprendizado
     train_sizes, train_scores, test_scores = learning_curve(
         modelo.best_estimator_, X_train, y_train,
-        cv=3, scoring='roc_auc', n_jobs=2
+        cv=config['cross_val']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
     )
     
     fig_curve = go.Figure()
@@ -142,47 +142,41 @@ def treinar_optuna(df_dengue, target, config, init):
         "info/memoria_inicio": psutil.virtual_memory().percent,
         "info/cpu_inicio": psutil.cpu_percent()
     })
-    
-    # Configuração do modelo
-    model_type = config['model']['type'].lower()
-    params = config['model']['params']
-    cv = config['train']['cv']
-    random_state = config['train']['random_state']
 
     def objective(trial):
         # Configuração dos parâmetros para otimização
-        if model_type == "xgboost":
+        if config['model']['type'].lower() == "xgboost":
             trial_params = {
-                "n_estimators": trial.suggest_categorical("n_estimators", params["n_estimators"]),
-                "max_depth": trial.suggest_categorical("max_depth", params["max_depth"]),
-                "learning_rate": trial.suggest_categorical("learning_rate", params["learning_rate"]),
-                "subsample": trial.suggest_categorical("subsample", params["subsample"]),
-                "colsample_bytree": trial.suggest_categorical("colsample_bytree", params["colsample_bytree"]),
-                "gamma": trial.suggest_categorical("gamma", params["gamma"]),
-                "random_state": random_state,
+                "n_estimators": trial.suggest_categorical("n_estimators", config['model']['params']["n_estimators"]),
+                "max_depth": trial.suggest_categorical("max_depth", config['model']['params']["max_depth"]),
+                "learning_rate": trial.suggest_categorical("learning_rate", config['model']['params']["learning_rate"]),
+                "subsample": trial.suggest_categorical("subsample", config['model']['params']["subsample"]),
+                "colsample_bytree": trial.suggest_categorical("colsample_bytree", config['model']['params']["colsample_bytree"]),
+                "gamma": trial.suggest_categorical("gamma", config['model']['params']["gamma"]),
+                "random_state": config['train']['random_state'],
                 "objective": "binary:logistic"  # Alterado para classificação binária
             }
             model = xgb.XGBClassifier(**trial_params)
         
-        elif model_type == "lightgbm":
+        elif config['model']['type'].lower() == "lightgbm":
             trial_params = {
-                "n_estimators": trial.suggest_categorical("n_estimators", params["n_estimators"]),
-                "max_depth": trial.suggest_categorical("max_depth", params["max_depth"]),
-                "learning_rate": trial.suggest_categorical("learning_rate", params["learning_rate"]),
-                "num_leaves": trial.suggest_categorical("num_leaves", params["num_leaves"]),
-                "min_data_in_leaf": trial.suggest_categorical("min_data_in_leaf", params["min_data_in_leaf"]),
-                "feature_fraction": trial.suggest_categorical("feature_fraction", params["feature_fraction"]),
-                "bagging_fraction": trial.suggest_categorical("bagging_fraction", params["bagging_fraction"]),
-                "bagging_freq": trial.suggest_categorical("bagging_freq", params["bagging_freq"]),
-                "random_state": random_state,
+                "n_estimators": trial.suggest_categorical("n_estimators", config['model']['params']["n_estimators"]),
+                "max_depth": trial.suggest_categorical("max_depth", config['model']['params']["max_depth"]),
+                "learning_rate": trial.suggest_categorical("learning_rate", config['model']['params']["learning_rate"]),
+                "num_leaves": trial.suggest_categorical("num_leaves", config['model']['params']["num_leaves"]),
+                "min_data_in_leaf": trial.suggest_categorical("min_data_in_leaf", config['model']['params']["min_data_in_leaf"]),
+                "feature_fraction": trial.suggest_categorical("feature_fraction", config['model']['params']["feature_fraction"]),
+                "bagging_fraction": trial.suggest_categorical("bagging_fraction", config['model']['params']["bagging_fraction"]),
+                "bagging_freq": trial.suggest_categorical("bagging_freq", config['model']['params']["bagging_freq"]),
+                "random_state": config['train']['random_state'],
                 "objective": "binary"  # Alterado para classificação binária
             }
             model = lgb.LGBMClassifier(**trial_params)
 
-        # Cross-validation usando AUC como métrica
+        # Cross-validation
         score = cross_val_score(
             model, X_train, y_train,
-            cv=cv, scoring="roc_auc", n_jobs=2
+            cv=config['train']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
         )
         return -score.mean()  # Negativo pois o Optuna minimiza
 
@@ -199,7 +193,7 @@ def treinar_optuna(df_dengue, target, config, init):
 
     # Treinar modelo final
     best_params = study.best_params
-    if model_type == "xgboost":
+    if config['model']['type'].lower() == "xgboost":
         modelo = xgb.XGBClassifier(**best_params)
     else:
         modelo = lgb.LGBMClassifier(**best_params)
@@ -216,13 +210,13 @@ def treinar_optuna(df_dengue, target, config, init):
     # Avaliação usando as funções de utils.py
     _ = avaliar_modelo_completo(
         y_test, y_pred, y_pred_proba,
-        nome_modelo=f"{model_type.upper()} - Optuna"
+        nome_modelo=f"{config['model']['type'].lower().upper()} - Optuna"
     )
 
     # Curva de aprendizado
     train_sizes, train_scores, test_scores = learning_curve(
         modelo, X_train, y_train,
-        cv=3, scoring='roc_auc', n_jobs=2
+        cv=config['train']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
     )
     
     fig_curve = go.Figure()
@@ -278,7 +272,7 @@ def treinar_optuna(df_dengue, target, config, init):
     artifact = wandb.Artifact(
         "df_dengue",
         type="dataset",
-        description=f"Dataset usado para treinar {model_type} com Optuna"
+        description=f"Dataset usado para treinar {config['model']['type'].lower()} com Optuna"
     )
     df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)

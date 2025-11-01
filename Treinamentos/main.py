@@ -1,6 +1,5 @@
 import pandas as pd
 import yaml
-from sklearn.model_selection import train_test_split
 from src.train import treinar_gridsearch, treinar_optuna
 
 #==============================INPUT==================================================
@@ -9,19 +8,19 @@ init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
     'tags': ['teste'],
     'name': 'Dengue_v1',
-    'df_name': 'df_dengue_reduzido_20'
+    'df_name': 'df_dengue_reduzido_1'
 }
 
 # Seleciona experimento
-yaml_file = "xgb_grid_1"
+yaml_file = "lgbm_grid_2"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
-# Seleciona quais métodos de seleção de hiperparãmteros usar
+# Seleciona quais métodos de seleção de hiperparâmteros usar
 use_gridsearch = True
-use_optuna = False
+use_optuna = True
 
 #=====================================================================================
 
@@ -31,10 +30,7 @@ with open(file_path, "r") as f:
     config = yaml.safe_load(f)
 
 # Carrega df reduzido
-df_dengue_reduzido = pd.read_csv('Treinamentos/data/df_dengue_reduzido_20.csv')
-
-# VERIFICAR MELHOR SCORING PARA APLICA_PARAMETROS EM MODELS
-# REVER PLOTS DE UTILS
+df_dengue_reduzido = pd.read_csv('Treinamentos/data/'+init['df_name']+'.csv')
 
 # Roda os experimentos
 if use_gridsearch:

@@ -1,0 +1,26 @@
+model:
+  type: 'XGBoost'
+  param_format: 'grid'
+  scale_pos_weight: 200
+  params:
+    n_estimators: [100, 200, 500]
+    max_depth: [4, 5, 6, 8]
+    learning_rate: [0.01, 0.05, 0.1]
+    subsample: [0.6, 0.8, 1.0]
+    colsample_bytree: [0.6, 0.8, 1.0]
+    gamma: [0, 0.01, 0.1]
+    min_child_weight: [1, 3, 5]
+    scale_pos_weight: [1, 5, 10]
+
+train:
+  test_size: 0.2
+  cv: 3
+  random_state: 42
+
+cross_val:
+  n_jobs: 2
+  scoring: 'recall'
+  refit: 'recall'
+  verbose: 1
+
+file: 'xgb_grid_2'
