@@ -79,7 +79,7 @@ def metricas_medicas(y_true, y_pred, y_pred_proba=None):
     """
     Métricas relevantes para diagnóstico médico
     """
-    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    tn, fn, fp, tp = confusion_matrix(y_true, y_pred).ravel()
     
     metricas = {
         'Sensibilidade': tp / (tp + fn),  # Capacidade de detectar casos graves
@@ -163,17 +163,6 @@ def avaliar_modelo_completo(y_true, y_pred, y_pred_proba=None, nome_modelo="Mode
     })
     
     return {**metricas_basicas, **metricas_med}
-
-# ==============================================================================
-# PLOTA GRÁFICOS DE REAL VC PREVISTO
-# ==============================================================================
-def plotar_real_vs_previsto(datas, y_real, y_previsto, produto_nome, tipo_modelo, tuning, file):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=datas, y=y_real, mode='lines+markers', name='Real', line=dict(color='blue', width=2)))
-    fig.add_trace(go.Scatter(x=datas, y=y_previsto, mode='lines+markers', name='Previsto', line=dict(color='red', dash='dot')))
-    titulo = f"Real x Previsto - {produto_nome} | Modelo: {tipo_modelo} - {file} - {tuning}"
-    fig.update_layout(title=titulo, xaxis_title='Data', yaxis_title='Quantidade vendida', template='plotly_white')
-    wandb.log({f"Real_vs_Previsto_{produto_nome}": fig})
 
 # ==============================================================================
 # DEFINE TREINO E TESTE
