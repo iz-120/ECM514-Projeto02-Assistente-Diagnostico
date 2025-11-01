@@ -13,15 +13,15 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "lgbm_grid_3"
+yaml_file = "rf_grid_1"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
-use_gridsearch = False
-use_optuna = True
+use_gridsearch = True
+use_optuna = False
 use_nn = False 
 
 #=====================================================================================
