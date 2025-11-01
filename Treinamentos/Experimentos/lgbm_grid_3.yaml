@@ -24,4 +24,11 @@ train:
   cv: 3
   random_state: 42
 
+cross_val:
+  n_jobs: 2
+  scoring: 'recall'
+  refit: 'recall'
+  verbose: 1
+  n_trials: 30
+
 file: "lgbm_grid_3"
