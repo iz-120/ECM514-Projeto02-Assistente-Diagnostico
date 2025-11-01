@@ -24,8 +24,8 @@ def criar_modelo(config):
     elif config['model']['type'].lower() in ['lgbmclassifier', 'lightgbm']:
         return lgb.LGBMClassifier(
             random_state=config['train']['random_state'],
-            objective='binary',
-            class_weight='balanced',
+            objective=config['model']['fixed_params']['objective'],
+            class_weight=config['model']['fixed_params']['class_weight'],
         )
     else:
         raise ValueError(f"Modelo {config['model']['type']} não suportado")
