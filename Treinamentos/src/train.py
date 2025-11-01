@@ -11,6 +11,9 @@ from src.utils import define_train_test, avaliar_modelo_completo, flatten_config
 import plotly.graph_objects as go
 import xgboost as xgb
 import lightgbm as lgb
+from imblearn.pipeline import Pipeline as ImbPipeline
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import MinMaxScaler
 
 def treinar_gridsearch(df_dengue, target, config, init):
     """
@@ -64,7 +67,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     # Curva de aprendizado
     train_sizes, train_scores, test_scores = learning_curve(
         modelo.best_estimator_, X_train, y_train,
-        cv=config['cross_val']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
+        cv=config['train']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
     )
     
     fig_curve = go.Figure()
@@ -88,8 +91,14 @@ def treinar_gridsearch(df_dengue, target, config, init):
     wandb.log({"visualizacoes/curva_aprendizado": fig_curve})
 
     # Importância das features
-    if hasattr(modelo.best_estimator_, 'feature_importances_'):
-        importances = modelo.best_estimator_.feature_importances_
+    try:
+        best_est = modelo.best_estimator_
+        clf_inside = best_est.named_steps['clf']
+    except Exception:
+        clf_inside = getattr(modelo, 'best_estimator_', modelo)
+
+    if hasattr(clf_inside, 'feature_importances_'):
+        importances = clf_inside.feature_importances_
         features = X_train.columns
         df_import = pd.DataFrame({
             "Feature": features,
@@ -167,7 +176,13 @@ def treinar_optuna(df_dengue, target, config, init):
             }
             base = criar_modelo(config)
             model = base.set_params(**trial_params)
-        
+            # wrap model into pipeline that applies MinMax scaling and SMOTE
+            pipeline = ImbPipeline([
+                ('scaler', MinMaxScaler()),
+                ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+                ('clf', model)
+            ])
+
         elif config['model']['type'].lower() == "lightgbm":
             trial_params = {
                 "n_estimators": trial.suggest_categorical("n_estimators", config['model']['params']["n_estimators"]),
@@ -183,10 +198,15 @@ def treinar_optuna(df_dengue, target, config, init):
             }
             base = criar_modelo(config)
             model = base.set_params(**trial_params)
+            pipeline = ImbPipeline([
+                ('scaler', MinMaxScaler()),
+                ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+                ('clf', model)
+            ])
 
         # Cross-validation
         score = cross_val_score(
-            model, X_train, y_train,
+            pipeline, X_train, y_train,
             cv=config['train']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
         )
         return score.mean()
@@ -202,12 +222,18 @@ def treinar_optuna(df_dengue, target, config, init):
         "optuna/n_trials": len(study.trials)
     })
 
-    # Treinar modelo final
+    # Treinar modelo final (envolto em pipeline com scaler+SMOTE)
     best_params = study.best_params
     if config['model']['type'].lower() == "xgboost":
-        modelo = xgb.XGBClassifier(**best_params)
+        clf = xgb.XGBClassifier(**best_params)
     else:
-        modelo = lgb.LGBMClassifier(**best_params)
+        clf = lgb.LGBMClassifier(**best_params)
+
+    modelo = ImbPipeline([
+        ('scaler', MinMaxScaler()),
+        ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+        ('clf', clf)
+    ])
 
     # Treina e mede tempo
     inicio = time.time()
@@ -250,9 +276,14 @@ def treinar_optuna(df_dengue, target, config, init):
     )
     wandb.log({"visualizacoes/curva_aprendizado": fig_curve})
 
-    # Importância das features
-    if hasattr(modelo, 'feature_importances_'):
-        importances = modelo.feature_importances_
+    # Importância das features (acessa o classificador dentro do pipeline, se existir)
+    try:
+        clf_inside = modelo.named_steps['clf']
+    except Exception:
+        clf_inside = modelo
+
+    if hasattr(clf_inside, 'feature_importances_'):
+        importances = clf_inside.feature_importances_
         features = X_train.columns
         df_import = pd.DataFrame({
             "Feature": features,
