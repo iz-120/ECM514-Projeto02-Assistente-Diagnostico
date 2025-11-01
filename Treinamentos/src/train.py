@@ -153,10 +153,12 @@ def treinar_optuna(df_dengue, target, config, init):
                 "subsample": trial.suggest_categorical("subsample", config['model']['params']["subsample"]),
                 "colsample_bytree": trial.suggest_categorical("colsample_bytree", config['model']['params']["colsample_bytree"]),
                 "gamma": trial.suggest_categorical("gamma", config['model']['params']["gamma"]),
+                "scale_pos_weight": trial.suggest_categorical("scale_pos_weight", config['model']['params']["scale_pos_weight"]),
                 "random_state": config['train']['random_state'],
                 "objective": "binary:logistic"  # Alterado para classificação binária
             }
-            model = xgb.XGBClassifier(**trial_params)
+            base = criar_modelo(config)
+            model = base.set_params(**trial_params)
         
         elif config['model']['type'].lower() == "lightgbm":
             trial_params = {
@@ -169,24 +171,25 @@ def treinar_optuna(df_dengue, target, config, init):
                 "bagging_fraction": trial.suggest_categorical("bagging_fraction", config['model']['params']["bagging_fraction"]),
                 "bagging_freq": trial.suggest_categorical("bagging_freq", config['model']['params']["bagging_freq"]),
                 "random_state": config['train']['random_state'],
-                "objective": "binary"  # Alterado para classificação binária
+                "objective": "binary"
             }
-            model = lgb.LGBMClassifier(**trial_params)
+            base = criar_modelo(config)
+            model = base.set_params(**trial_params)
 
         # Cross-validation
         score = cross_val_score(
             model, X_train, y_train,
             cv=config['train']['cv'], scoring=config['cross_val']['scoring'], n_jobs=config['cross_val']['n_jobs']
         )
-        return -score.mean()  # Negativo pois o Optuna minimiza
+        return score.mean()
 
     # Otimização com Optuna
-    study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=30, show_progress_bar=True)
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=config['cross_val']['n_trials'], show_progress_bar=True)
 
     # Log dos resultados da otimização
     wandb.log({
-        "optuna/melhor_valor": -study.best_value,  # Convertendo de volta para positivo
+        "optuna/melhor_valor": study.best_value,
         "optuna/melhor_trial": study.best_trial.number,
         "optuna/n_trials": len(study.trials)
     })

@@ -18,9 +18,8 @@ def criar_modelo(config):
     elif config['model']['type'].lower() in ['xgbclassifier', 'xgboost']:
         return xgb.XGBClassifier(
             random_state=config['train']['random_state'],
-            tree_method='hist',
-            scale_pos_weight=config['model']['scale_pos_weight'],  # Ajustar baseado no desbalanceamento
-            objective='binary:logistic'
+            tree_method=config['model']['fixed_params']['tree_method'],
+            objective=config['model']['fixed_params']['objective']
         )
     elif config['model']['type'].lower() in ['lgbmclassifier', 'lightgbm']:
         return lgb.LGBMClassifier(
@@ -37,10 +36,10 @@ def aplica_parametros(modelo_base, config):
             modelo_base,
             param_grid=config['model']['params'],
             cv=config['train']['cv'],
-            scoring=config['grid_search']['scoring'],
-            refit=config['grid_search']['refit'],
-            n_jobs=config['grid_search']['n_jobs'],
-            verbose=config['grid_search']['verbose'],
+            scoring=config['cross_val']['scoring'],
+            refit=config['cross_val']['refit'],
+            n_jobs=config['cross_val']['n_jobs'],
+            verbose=config['cross_val']['verbose'],
             return_train_score=True
         )
     elif config['model']['param_format'].lower() in ['simple', 'finetuning']:
