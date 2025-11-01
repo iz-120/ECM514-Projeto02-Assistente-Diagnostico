@@ -1,18 +1,19 @@
 import pandas as pd
 import yaml
 from src.train import treinar_gridsearch, treinar_optuna
+from src.nn_model import treinar_nn
 
 #==============================INPUT==================================================
 # Configurações gerais
 init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
     'tags': ['teste'],
-    'name': 'Dengue_v2',
+    'name': 'Dengue_v3',
     'df_name': 'df_dengue_reduzido_1'
 }
 
 # Seleciona experimento
-yaml_file = "xgb_grid_2"
+yaml_file = "nn_mlp_1"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
@@ -20,7 +21,8 @@ target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
 use_gridsearch = False
-use_optuna = True
+use_optuna = False
+use_nn = True 
 
 #=====================================================================================
 
@@ -40,3 +42,7 @@ if use_gridsearch:
 if use_optuna:
     # Roda experimentos com Optuna
     _, _, _ = treinar_optuna(df_dengue_reduzido, target, config, init)
+
+if use_nn:
+    # Roda experimento com rede neural (MLP)
+    _, _, _ = treinar_nn(df_dengue_reduzido, target, config, init)
