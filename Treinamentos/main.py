@@ -9,7 +9,7 @@ init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
     'tags': ['teste'],
     'name': 'Dengue_v5',
-    'df_name': 'df_dengue_reduzido_1'
+    'df_name': 'df_dengue_reduzido_5'
 }
 
 # Seleciona experimento
@@ -32,6 +32,10 @@ with open(file_path, "r") as f:
 
 # Carrega df reduzido
 df_dengue_reduzido = pd.read_csv('Treinamentos/data/'+init['df_name']+'.csv')
+
+# Remove coluna data
+if 'DT_NOTIFIC' in df_dengue_reduzido.columns:
+    df_dengue_reduzido = df_dengue_reduzido.drop(columns=['DT_NOTIFIC'])
 
 # Roda os experimentos
 if use_gridsearch:

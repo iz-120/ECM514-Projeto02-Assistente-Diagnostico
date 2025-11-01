@@ -194,14 +194,14 @@ def define_train_test(df_dengue, target, config):
     X_train, X_test, y_train, y_test : pd.DataFrame, pd.DataFrame, pd.Series, pd.Series
     """
     # Definir X (features) e y (alvo)
-    X = df_dengue.drop('RISCO_GRAVIDADE_grave', axis=1)
-    y = df_dengue['RISCO_GRAVIDADE_grave']
+    X = df_dengue.drop(target, axis=1)
+    y = df_dengue[target]
 
     # SPLIT PERCENTUAL
     X_train, X_test, y_train, y_test = train_test_split(
     X, y,
-    test_size=0.2,
-    random_state=42,
+    test_size=config['train']['test_size'],
+    random_state=config['train']['random_state'],
     stratify=y
     )
 

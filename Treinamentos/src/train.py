@@ -13,7 +13,7 @@ import xgboost as xgb
 import lightgbm as lgb
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 def treinar_gridsearch(df_dengue, target, config, init):
     """
@@ -178,7 +178,7 @@ def treinar_optuna(df_dengue, target, config, init):
             model = base.set_params(**trial_params)
             # wrap model into pipeline that applies MinMax scaling and SMOTE
             pipeline = ImbPipeline([
-                ('scaler', MinMaxScaler()),
+                ('scaler', StandardScaler()),
                 ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
                 ('clf', model)
             ])
@@ -199,7 +199,7 @@ def treinar_optuna(df_dengue, target, config, init):
             base = criar_modelo(config)
             model = base.set_params(**trial_params)
             pipeline = ImbPipeline([
-                ('scaler', MinMaxScaler()),
+                ('scaler', StandardScaler()),
                 ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
                 ('clf', model)
             ])
@@ -230,7 +230,7 @@ def treinar_optuna(df_dengue, target, config, init):
         clf = lgb.LGBMClassifier(**best_params)
 
     modelo = ImbPipeline([
-        ('scaler', MinMaxScaler()),
+        ('scaler', StandardScaler()),
         ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
         ('clf', clf)
     ])
