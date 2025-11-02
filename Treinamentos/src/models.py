@@ -41,10 +41,18 @@ def criar_modelo(config):
         raise ValueError(f"Modelo {config['model']['type']} não suportado")
     
 def aplica_parametros(modelo_base, config):
-    # Build a pipeline that applies scaling and SMOTE before the classifier
+    smote_params = config.get('smote', {})
+    smote_kwargs = {
+        'random_state': config['train'].get('random_state', 42)
+    }
+    # Add any fixed SMOTE params from config (not part of search space)
+    for key in ['k_neighbors', 'sampling_strategy']:
+        if key in smote_params and not isinstance(smote_params[key], list):
+            smote_kwargs[key] = smote_params[key]
+    
     pipeline = ImbPipeline([
         ('scaler', StandardScaler()),
-        ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+        ('smote', SMOTE(**smote_kwargs)),
         ('clf', modelo_base)
     ])
 
@@ -53,6 +61,12 @@ def aplica_parametros(modelo_base, config):
         param_grid = {}
         for k, v in raw_grid.items():
             param_grid[f'clf__{k}'] = v
+        
+        # Add SMOTE params to grid if provided as lists (search space)
+        smote_params = config.get('smote', {})
+        for k, v in smote_params.items():
+            if isinstance(v, list):
+                param_grid[f'smote__{k}'] = v
 
         return GridSearchCV(
             pipeline,
@@ -69,16 +83,24 @@ def aplica_parametros(modelo_base, config):
         param_distributions = {}
         for k, v in raw_grid.items():
             param_distributions[f'clf__{k}'] = v
+        
+        # Add SMOTE params to distributions if provided as lists (search space)
+        smote_params = config.get('smote', {})
+        for k, v in smote_params.items():
+            if isinstance(v, list):
+                param_distributions[f'smote__{k}'] = v
 
         return RandomizedSearchCV(
             pipeline,
             param_distributions=param_distributions,
+            n_iter=config['cross_val'].get('n_iter', 10),
             cv=config['train']['cv'],
             scoring=config['cross_val']['scoring'],
             refit=config['cross_val'].get('refit', True),
             n_jobs=config['cross_val'].get('n_jobs', 1),
             verbose=config['cross_val'].get('verbose', 1),
-            return_train_score=True
+            return_train_score=True,
+            random_state=config['train'].get('random_state', 42)
         )
     elif config['model']['param_format'].lower() in ['simple', 'finetuning']:
         # apply provided params to the classifier and return the full pipeline

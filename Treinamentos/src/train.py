@@ -163,7 +163,18 @@ def treinar_optuna(df_dengue, target, config, init):
     })
 
     def objective(trial):
-        # Configuração dos parâmetros para otimização
+        # Configuração dos parâmetros SMOTE para otimização
+        smote_config = config.get('smote', {})
+        smote_params = {'random_state': config['train'].get('random_state', 42)}
+        
+        # Para cada parâmetro do SMOTE que é uma lista, usar suggest_categorical
+        for key, value in smote_config.items():
+            if isinstance(value, list):
+                smote_params[key] = trial.suggest_categorical(f'smote_{key}', value)
+            else:
+                smote_params[key] = value
+        
+        # Configuração dos parâmetros do modelo para otimização
         if config['model']['type'].lower() == "xgboost":
             trial_params = {
                 "n_estimators": trial.suggest_categorical("n_estimators", config['model']['params']["n_estimators"]),
@@ -181,7 +192,7 @@ def treinar_optuna(df_dengue, target, config, init):
             # wrap model into pipeline that applies scaling and SMOTE
             pipeline = ImbPipeline([
                 ('scaler', StandardScaler()),
-                ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+                ('smote', SMOTE(**smote_params)),
                 ('clf', model)
             ])
 
@@ -203,7 +214,7 @@ def treinar_optuna(df_dengue, target, config, init):
             model = base.set_params(**trial_params)
             pipeline = ImbPipeline([
                 ('scaler', StandardScaler()),
-                ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+                ('smote', SMOTE(**smote_params)),
                 ('clf', model)
             ])
 
@@ -227,14 +238,29 @@ def treinar_optuna(df_dengue, target, config, init):
 
     # Treinar modelo final (envolto em pipeline com scaler+SMOTE)
     best_params = study.best_params
+    
+    # Separar parâmetros do SMOTE e do modelo
+    smote_best_params = {'random_state': config['train'].get('random_state', 42)}
+    model_best_params = {}
+    
+    for key, value in best_params.items():
+        if key.startswith('smote_'):
+            # Remove o prefixo 'smote_' e adiciona aos parâmetros do SMOTE
+            smote_best_params[key.replace('smote_', '')] = value
+        else:
+            model_best_params[key] = value
+    
+    # Log dos parâmetros do SMOTE escolhidos
+    wandb.log({"optuna/smote_params": smote_best_params})
+    
     if config['model']['type'].lower() == "xgboost":
-        clf = xgb.XGBClassifier(**best_params)
+        clf = xgb.XGBClassifier(**model_best_params)
     else:
-        clf = lgb.LGBMClassifier(**best_params)
+        clf = lgb.LGBMClassifier(**model_best_params)
 
     modelo = ImbPipeline([
         ('scaler', StandardScaler()),
-        ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
+        ('smote', SMOTE(**smote_best_params)),
         ('clf', clf)
     ])
 
