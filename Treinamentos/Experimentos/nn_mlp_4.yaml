@@ -2,6 +2,8 @@ model:
   type: "NN MLP"
   param_format: "optuna"
 
+# Att: simplifica hidden_layer_sizes, alpha; reduz n_trials
+
 nn:
   hidden_layer_sizes: [50, 100, "[50,25]"]
   activation: ['relu']

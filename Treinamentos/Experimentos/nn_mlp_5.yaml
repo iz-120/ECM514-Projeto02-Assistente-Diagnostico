@@ -20,6 +20,6 @@ cross_val:
   scoring: "recall"
   refit: "recall"
   verbose: 1
-  n_trials: 10
+  n_trials: 10 # Att: aumenta de 5 para 10
 
 file: "nn_mlp_5"
