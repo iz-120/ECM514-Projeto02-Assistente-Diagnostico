@@ -71,7 +71,6 @@ st.sidebar.header("Informações do Paciente")
 idade = st.sidebar.number_input("Idade", min_value=0, max_value=120, value=30, step=1)
 dias_com_sintomas = st.sidebar.number_input("Dias com sintomas", min_value=0, max_value=120, value=1, step=1)
 sexo = st.sidebar.selectbox("Sexo", options=[('Masculino', 0), ('Feminino', 1), ('Não declarar', 2)], format_func=lambda x: x[0])
-raca = st.sidebar.selectbox("Raça/Cor", options=[('Branca', 1), ('Preta', 1), ('Parda', 1), ('Amarela', 1), ('Indígena', 1), ('Não declarar', 1)], format_func=lambda x: x[0])
 
 # Inputs de Sinais e Sintomas (Checkboxes são perfeitos para isto)
 st.sidebar.subheader("Sinais e Sintomas Clínicos")
@@ -81,11 +80,12 @@ st.sidebar.subheader("Sinais e Sintomas Clínicos")
 febre = st.sidebar.checkbox("Febre")
 mialgia = st.sidebar.checkbox("Mialgia (Dor Muscular)")
 exantema = st.sidebar.checkbox("Exantema (Erupção Cutânea)")
+cefaleia = st.sidebar.checkbox("Cefaleia (Dor de Cabeça)")
 vomito = st.sidebar.checkbox("Vômito")
 nausea = st.sidebar.checkbox("Náusea")
 petequia = st.sidebar.checkbox("Petéquias")
 atralgia = st.sidebar.checkbox("Artralgia (Dor nas Articulações)")
-DOR_RETRO_sim = st.sidebar.checkbox("Dor Retroorbital")
+dor_retro = st.sidebar.checkbox("Dor Retroorbital")
 
 # Botão para executar a predição
 botao_predicao = st.sidebar.button("Avaliar Risco")
@@ -104,19 +104,15 @@ if botao_predicao and model_pipeline is not None and shap_explainer is not None 
         'DIAS_COM_SINTOMAS': [dias_com_sintomas],
         'CS_SEXO_F': [1 if sexo[1] == 1 else 0],
         'CS_SEXO_I': [1 if sexo[1] == 2 else 0],
-        'CS_RACA_Amarela': [1 if raca[1] == 3 else 0],
-        'CS_RACA_Branca': [1 if raca[1] == 0 else 0],
-        'CS_RACA_Indigena': [1 if raca[1] == 4 else 0],
-        'CS_RACA_Parda': [1 if raca[1] == 2 else 0],
-        'CS_RACA_Preta': [1 if raca[1] == 1 else 0],
         'FEBRE_sim': [int(febre)],
         'MIALGIA_sim': [int(mialgia)],
+        'CEFALEIA_sim': [int(cefaleia)],
         'EXANTEMA_sim': [int(exantema)],
         'VOMITO_sim': [int(vomito)],
         'NAUSEA_sim': [int(nausea)],
         'PETEQUIA_N_sim': [int(petequia)],
         'ARTRALGIA_sim': [int(atralgia)],
-        'SANGRAMENT': [int(DOR_RETRO_sim)]
+        'DOR_RETRO_sim': [int(dor_retro)]
     }
     
     # Criar o DataFrame com as colunas na ordem correta
@@ -126,7 +122,7 @@ if botao_predicao and model_pipeline is not None and shap_explainer is not None 
         input_df = input_df.reindex(columns=model_colunas, fill_value=0) 
     except Exception as e:
         st.error(f"Erro ao formatar os dados de entrada: {e}")
-        st.stop() # Pára a execução
+        st.stop() # Para a execução
 
     # 2. Fazer a Predição
     try:
@@ -174,14 +170,14 @@ if botao_predicao and model_pipeline is not None and shap_explainer is not None 
         
         # 4. Criar o gráfico
         fig, ax = plt.subplots(figsize=(10, 5))
-        # Criamos o objeto de explicação SHAP
+        # Criar o objeto de explicação SHAP
         expl = shap.Explanation(
             values=shap_values,
             base_values=shap_explainer.expected_value,
             data=input_df.iloc[0],
             feature_names=model_colunas
         )
-        shap.plots.waterfall(expl, max_display=10, show=False) # max_display=10 mostra os 10 principais fatores
+        shap.plots.waterfall(expl, max_display=15, show=False)
         plt.tight_layout()
         st.pyplot(fig)
         
