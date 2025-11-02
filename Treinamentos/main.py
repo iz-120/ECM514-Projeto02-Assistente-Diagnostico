@@ -20,7 +20,7 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "rf_3"
+yaml_file = "rf_4"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
