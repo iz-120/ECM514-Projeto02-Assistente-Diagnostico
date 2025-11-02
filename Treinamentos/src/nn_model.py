@@ -224,33 +224,12 @@ def treinar_nn(df_dengue, target, config, init):
         best_pipeline = pipeline
 
     # Cross-validation manual (para poder usar sample_weight)
-    skf = StratifiedKFold(n_splits=config['train']['cv'] if config is not None else 5, shuffle=True, random_state=config['train']['random_state'] if config is not None else 42)
-    recalls = []
-    fold = 0
-    for train_idx, val_idx in skf.split(X_train, y_train):
-        fold += 1
-        X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
-        y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[val_idx]
-        sample_weight = y_tr.map(lambda c: class_weight_dict[c]).values
-        try:
-            best_pipeline.fit(X_tr, y_tr, clf__sample_weight=sample_weight)
-        except TypeError:
-            best_pipeline.fit(X_tr, y_tr)
-        y_pred = best_pipeline.predict(X_val)
-        r = recall_score(y_val, y_pred)
-        recalls.append(r)
-        wandb.log({f"cv/fold_{fold}_recall": r})
-
-    mean_recall = float(np.mean(recalls)) if len(recalls) > 0 else 0.0
-    wandb.log({"cv/mean_recall": mean_recall})
+    best_pipeline.fit(X_train, y_train)
+    y_pred = best_pipeline.predict(X_test)
 
     # Treina final em todo o conjunto de treino usando best_pipeline
     inicio = time.time()
-    sample_weight_full = y_train.map(lambda c: class_weight_dict[c]).values
-    try:
-        best_pipeline.fit(X_train, y_train, clf__sample_weight=sample_weight_full)
-    except TypeError:
-        best_pipeline.fit(X_train, y_train)
+    best_pipeline.fit(X_train, y_train)
     tempo_treino = time.time() - inicio
 
     # Predições
@@ -269,8 +248,7 @@ def treinar_nn(df_dengue, target, config, init):
     wandb.log({
         "info/memoria_fim": None,
         "info/cpu_fim": None,
-        "tempo/treino": tempo_treino,
-        "nn/mean_cv_recall": mean_recall
+        "tempo/treino": tempo_treino
     })
 
     # Registro do dataset no W&B
