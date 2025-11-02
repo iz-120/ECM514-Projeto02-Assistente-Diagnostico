@@ -60,7 +60,7 @@ def treinar_nn(df_dengue, target, config, init):
     Retorna: pipeline_treinado, y_pred, None (sem df_import)
     """
     # Inicia run
-    wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
+    wandb.init(entity=init['org_name'], project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
 
     # Flatten config e atualiza wandb.config
     flattened_config = flatten_config(config) if config is not None else {}
