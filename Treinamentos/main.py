@@ -14,13 +14,13 @@ import wandb
 init = {
     'org_name': 'izabel-sampaio-org',
     'project_name': 'Assistente_Diagnostico_Dengue',
-    'tags': ['1%', 'teste'],
+    'tags': ['1%'],
     'name': 'Dengue_v6',
     'df_name': 'df_dengue_reduzido_1'
 }
 
 # Seleciona experimento
-yaml_file = "rf_2"
+yaml_file = "rf_3"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
