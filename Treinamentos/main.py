@@ -19,15 +19,15 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "logreg_3"
+yaml_file = "logreg_4"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
-use_grid_or_randomized_search = True
-use_optuna = False
+use_grid_or_randomized_search = False
+use_optuna = True
 use_nn = False 
 
 #=====================================================================================
