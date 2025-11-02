@@ -28,7 +28,7 @@ use_nn = True
 
 # Carrega config YAML
 with open(file_path, "r") as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)
+    config = yaml.safe_load(f)
 
 # Carrega df reduzido
 df_dengue_reduzido = pd.read_csv('Treinamentos/data/'+init['df_name']+'.csv')
