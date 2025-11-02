@@ -7,7 +7,7 @@ import wandb
 #==============================LOGIN WANDB============================================
 
 # Executar essa linha apenas na primeira execução com o novo login
-#wandb.login(key='0d6af85a91798236592a778392f7f917b2f5bb87')  # Substitua pela sua chave de API do Weights & Biases
+#wandb.login(key='sua_chave_API')  # Substitua pela sua chave de API do Weights & Biases
 
 #==============================INPUT==================================================
 # Configurações gerais
