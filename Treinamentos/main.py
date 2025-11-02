@@ -2,6 +2,12 @@ import pandas as pd
 import yaml
 from src.train import treinar_gridsearch, treinar_optuna
 from src.nn_model import treinar_nn
+import wandb
+
+#==============================LOGIN WANDB============================================
+
+# Executar essa linha apenas na primeira execução com o novo login
+wandb.login(key='0d6af85a91798236592a778392f7f917b2f5bb87')  # Substitua pela sua chave de API do Weights & Biases
 
 #==============================INPUT==================================================
 # Configurações gerais
