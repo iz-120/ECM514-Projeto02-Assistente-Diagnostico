@@ -159,7 +159,8 @@ def treinar_nn(df_dengue, target, config, init):
             for k, v in trial_params.items():
                 if k == 'hidden_layer_sizes':
                     if isinstance(v, str):
-                        parts = v.replace('-', ',').split(',')
+                        parts = v.replace('[', '').replace(']', '').split(',')
+                        parts= list(int(x) for x in parts if x != '')
                         typed[k] = tuple(int(x) for x in parts if x != '')
                     elif isinstance(v, (list, tuple)):
                         typed[k] = tuple(int(x) for x in v)
@@ -202,6 +203,12 @@ def treinar_nn(df_dengue, target, config, init):
         study.optimize(objective, n_trials=config['cross_val'].get('n_trials', 20))
 
         best_params = study.best_params
+
+        if isinstance(best_params["hidden_layer_sizes"], str):
+            parts = best_params["hidden_layer_sizes"].replace('[', '').replace(']', '').split(',')
+            parts= list(int(x) for x in parts if x != '')
+            best_params["hidden_layer_sizes"] = tuple(int(x) for x in parts if x != '')
+
         best_model = MLPClassifier(
             hidden_layer_sizes=best_params.get('hidden_layer_sizes', (128, 64)),
             activation=best_params.get('activation', 'relu'),
@@ -226,6 +233,7 @@ def treinar_nn(df_dengue, target, config, init):
     # Cross-validation manual (para poder usar sample_weight)
     best_pipeline.fit(X_train, y_train)
     y_pred = best_pipeline.predict(X_test)
+
 
     # Treina final em todo o conjunto de treino usando best_pipeline
     inicio = time.time()
