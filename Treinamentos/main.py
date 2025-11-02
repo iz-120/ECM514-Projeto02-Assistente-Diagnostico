@@ -2,7 +2,6 @@ import pandas as pd
 import yaml
 from src.train import treinar_gridsearch, treinar_optuna
 from src.nn_model import treinar_nn
-import wandb
 
 #==============================LOGIN WANDB============================================
 
@@ -20,15 +19,15 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "lgbm_5"
+yaml_file = "logreg_3"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
 target = 'RISCO_GRAVIDADE_grave'
 
 # Seleciona quais métodos de seleção de hiperparâmteros usar
-use_grid_or_randomized_search = False
-use_optuna = True
+use_grid_or_randomized_search = True
+use_optuna = False
 use_nn = False 
 
 #=====================================================================================
