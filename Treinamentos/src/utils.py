@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
 import wandb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, average_precision_score, roc_auc_score, accuracy_score, precision_score, recall_score, f1_score

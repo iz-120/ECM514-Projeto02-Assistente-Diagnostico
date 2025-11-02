@@ -4,7 +4,6 @@ import wandb
 import optuna
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.model_selection import learning_curve, cross_val_score
 from src.models import criar_modelo, aplica_parametros
 from src.utils import define_train_test, avaliar_modelo_completo, flatten_config
@@ -13,7 +12,7 @@ import xgboost as xgb
 import lightgbm as lgb
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 def treinar_gridsearch(df_dengue, target, config, init):
     """

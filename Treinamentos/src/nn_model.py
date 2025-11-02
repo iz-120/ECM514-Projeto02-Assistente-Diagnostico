@@ -1,14 +1,12 @@
 import time
 import numpy as np
-import pandas as pd
 import wandb
 import optuna
-from sklearn.model_selection import GridSearchCV, cross_val_score, StratifiedKFold
+from sklearn.model_selection import GridSearchCV, cross_val_score
 from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import recall_score
 from sklearn.utils.class_weight import compute_class_weight
 from src.utils import define_train_test, avaliar_modelo_completo, flatten_config
 
