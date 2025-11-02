@@ -58,7 +58,7 @@ model_colunas = carregar_colunas()
 # =============================================================================
 
 st.set_page_config(layout="wide")
-st.title("DEV-Dengue: Sistema de Apoio à Decisão Clínica")
+st.title("Sistema de Apoio à Decisão Clínica")
 st.markdown("Insira os dados do paciente na barra lateral para obter uma predição de risco.")
 
 # A barra lateral é ideal para colocar os controlos de input
