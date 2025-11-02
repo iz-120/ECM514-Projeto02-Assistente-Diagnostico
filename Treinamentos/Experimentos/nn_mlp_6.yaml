@@ -20,6 +20,6 @@ cross_val:
   scoring: "recall"
   refit: "recall"
   verbose: 1
-  n_trials: 15
+  n_trials: 15 # 15
 
 file: "nn_mlp_5"
