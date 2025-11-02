@@ -14,4 +14,4 @@ train:
   cv: 3
   random_state: 42
 
-file: 'xgb_grid_1'
+file: 'xgb_1'

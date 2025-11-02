@@ -26,4 +26,4 @@ cross_val:
   verbose: 1
   n_trials: 8
 
-file: 'xgb_grid_6'
+file: 'xgb_6'

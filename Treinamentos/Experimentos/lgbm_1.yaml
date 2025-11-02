@@ -15,4 +15,4 @@ train:
   cv: 3
   random_state: 42
 
-file: 'lgbm_grid_1'
+file: 'lgbm_1'

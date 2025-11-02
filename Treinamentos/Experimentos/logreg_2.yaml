@@ -19,4 +19,4 @@ cross_val:
   verbose: 2
   n_trials: 8
 
-file: 'logreg_grid_2'
+file: 'logreg_2'

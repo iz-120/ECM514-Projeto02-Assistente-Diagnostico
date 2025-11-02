@@ -1,6 +1,6 @@
 model:
   type: 'RandomForest'
-  param_format: 'grid'
+  param_format: 'RandomizedSearchCV'
   params:
     n_estimators: [100, 200, 500]
     max_depth:
@@ -22,4 +22,4 @@ cross_val:
   refit: 'recall'
   verbose: 1
 
-file: 'rf_1'
+file: 'rf_2'
