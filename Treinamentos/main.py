@@ -7,7 +7,7 @@ from src.nn_model import treinar_nn
 # Configurações gerais
 init = {
     'project_name': 'Assistente_Diagnostico_Dengue',
-    'tags': ['teste', '1%'],
+    'tags': ['5%'],
     'name': 'Dengue_v5',
     'df_name': 'df_dengue_reduzido_1'
 }
