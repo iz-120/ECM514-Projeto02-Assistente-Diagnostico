@@ -1,11 +1,11 @@
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
 import lightgbm as lgb
 from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 def criar_modelo(config):
     """
@@ -43,13 +43,12 @@ def criar_modelo(config):
 def aplica_parametros(modelo_base, config):
     # Build a pipeline that applies scaling and SMOTE before the classifier
     pipeline = ImbPipeline([
-        ('scaler', MinMaxScaler()),
+        ('scaler', StandardScaler()),
         ('smote', SMOTE(random_state=config['train'].get('random_state', 42))),
         ('clf', modelo_base)
     ])
 
     if config['model']['param_format'].lower() in ['grid', 'gridsearch', 'gridsearchcv']:
-        # transform param grid keys to target the classifier inside the pipeline
         raw_grid = config['model'].get('params', {})
         param_grid = {}
         for k, v in raw_grid.items():
@@ -63,6 +62,22 @@ def aplica_parametros(modelo_base, config):
             refit=config['cross_val'].get('refit', True),
             n_jobs=config['cross_val'].get('n_jobs', 1),
             verbose=config['cross_val'].get('verbose', 0),
+            return_train_score=True
+        )
+    elif config['model']['param_format'].lower() in ['random', 'randomsearch', 'randomizedsearchcv']:
+        raw_grid = config['model'].get('params', {})
+        param_distributions = {}
+        for k, v in raw_grid.items():
+            param_distributions[f'clf__{k}'] = v
+
+        return RandomizedSearchCV(
+            pipeline,
+            param_distributions=param_distributions,
+            cv=config['train']['cv'],
+            scoring=config['cross_val']['scoring'],
+            refit=config['cross_val'].get('refit', True),
+            n_jobs=config['cross_val'].get('n_jobs', 1),
+            verbose=config['cross_val'].get('verbose', 1),
             return_train_score=True
         )
     elif config['model']['param_format'].lower() in ['simple', 'finetuning']:

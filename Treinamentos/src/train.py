@@ -26,7 +26,10 @@ def treinar_gridsearch(df_dengue, target, config, init):
     wandb.config.update(flattened_config)
     
     # Log do método de otimização
-    wandb.log({"Otimização": "GridSearchCV"})
+    if config['model']['param_format'].lower() in ['grid', 'gridsearch', 'gridsearchcv']:
+        wandb.log({"Otimização": "GridSearchCV"})
+    elif config['model']['param_format'].lower() in ['random', 'randomsearch', 'randomizedsearchcv']:
+        wandb.log({"Otimização": "RandomizedSearchCV"})
     
     # Define grupos de treino e teste
     X_train, X_test, y_train, y_test = define_train_test(df_dengue, target, config=config)
@@ -53,7 +56,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     # Avaliação usando as funções de utils.py
     _ = avaliar_modelo_completo(
         y_test, y_pred, y_pred_proba,
-        nome_modelo=f"{config['model']['type'].upper()} - GridSearch"
+        nome_modelo=f"{config['model']['type'].upper()} - {config['model']['param_format']}"
     )
 
     # Log dos resultados da grid
@@ -127,7 +130,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     artifact = wandb.Artifact(
         "df_dengue",
         type="dataset",
-        description=f"Dataset usado para treinar {config['model']['type']} com GridSearch"
+        description=f"Dataset usado para treinar {config['model']['type']} com {config['model']['param_format']}"
     )
     df_dengue.to_csv(path_df, index=False)
     artifact.add_file(path_df)
