@@ -19,7 +19,7 @@ def treinar_gridsearch(df_dengue, target, config, init):
     Treina modelo usando GridSearch para otimização de hiperparâmetros
     """
     # Inicia run
-    wandb.init(project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
+    wandb.init(entity=init['org_name'], project=init['project_name'], tags=init['tags'], config=config, name=init['name'])
     
     # Flatten config e atualiza wandb.config para melhor visualização
     flattened_config = flatten_config(config)
