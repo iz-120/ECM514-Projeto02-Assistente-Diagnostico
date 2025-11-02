@@ -70,7 +70,7 @@ st.sidebar.header("Informações do Paciente")
 # Inputs Demográficos
 idade = st.sidebar.number_input("Idade", min_value=0, max_value=120, value=30, step=1)
 dias_com_sintomas = st.sidebar.number_input("Dias com sintomas", min_value=0, max_value=120, value=1, step=1)
-sexo = st.sidebar.selectbox("Sexo", options=[('Masculino', 0), ('Feminino', 1), ('Não declarar', 1)], format_func=lambda x: x[0])
+sexo = st.sidebar.selectbox("Sexo", options=[('Masculino', 0), ('Feminino', 1), ('Não declarar', 2)], format_func=lambda x: x[0])
 raca = st.sidebar.selectbox("Raça/Cor", options=[('Branca', 1), ('Preta', 1), ('Parda', 1), ('Amarela', 1), ('Indígena', 1), ('Não declarar', 1)], format_func=lambda x: x[0])
 
 # Inputs de Sinais e Sintomas (Checkboxes são perfeitos para isto)
@@ -102,13 +102,13 @@ if botao_predicao and model_pipeline is not None and shap_explainer is not None 
     dados_paciente = {
         'IDADE_ANOS': [idade],
         'DIAS_COM_SINTOMAS': [dias_com_sintomas],
-        'CS_SEXO_F': [sexo[1]],
-        'CS_SEXO_I': [sexo[2]],
-        'CS_RACA_Amarela': [raca[3]],
-        'CS_RACA_Branca': [raca[0]],
-        'CS_RACA_Indigena': [raca[4]],
-        'CS_RACA_Parda': [raca[2]],
-        'CS_RACA_Preta': [raca[1]],
+        'CS_SEXO_F': [1 if sexo[1] == 1 else 0],
+        'CS_SEXO_I': [1 if sexo[1] == 2 else 0],
+        'CS_RACA_Amarela': [1 if raca[1] == 3 else 0],
+        'CS_RACA_Branca': [1 if raca[1] == 0 else 0],
+        'CS_RACA_Indigena': [1 if raca[1] == 4 else 0],
+        'CS_RACA_Parda': [1 if raca[1] == 2 else 0],
+        'CS_RACA_Preta': [1 if raca[1] == 1 else 0],
         'FEBRE_sim': [int(febre)],
         'MIALGIA_sim': [int(mialgia)],
         'EXANTEMA_sim': [int(exantema)],
