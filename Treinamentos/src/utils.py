@@ -79,7 +79,7 @@ def metricas_medicas(y_true, y_pred, y_pred_proba=None):
     """
     Métricas relevantes para diagnóstico médico
     """
-    tn, fn, fp, tp = confusion_matrix(y_true, y_pred).ravel()
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
     
     metricas = {
         'Sensibilidade': tp / (tp + fn),  # Capacidade de detectar casos graves
