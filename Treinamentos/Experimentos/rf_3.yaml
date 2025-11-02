@@ -1,0 +1,41 @@
+model:
+  type: "RandomForest"
+  param_format: "RandomizedSearchCV"
+
+  #Att: alterações visam reduzir FN
+
+  params:
+    n_estimators: [1000, 1200, 1600]
+    max_depth:
+      - 24
+      - 32
+      - 40
+      - !!null
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+    max_features: ["sqrt", "log2", 0.7, 0.9, 1.0]
+    criterion: ["gini", "entropy", "log_loss"]
+    bootstrap: [True]
+    max_samples: [0.6, 0.8, 1.0]
+    class_weight:
+      - "balanced"
+      - !!null
+    min_impurity_decrease: [0.0, 0.0001, 0.0005]
+
+smote:
+  sampling_strategy: [0.7, 0.9, 1.0]
+  k_neighbors: [3, 5] 
+
+train:
+  test_size: 0.2
+  cv: 3
+  random_state: 42
+
+cross_val:
+  n_iter: 10
+  n_jobs: 2
+  scoring: "recall"
+  refit: "recall"
+  verbose: 1
+
+file: "rf_3"
