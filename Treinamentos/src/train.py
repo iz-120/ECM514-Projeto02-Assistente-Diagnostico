@@ -217,6 +217,51 @@ def treinar_optuna(df_dengue, target, config, init):
                 ('smote', SMOTE(**smote_params)),
                 ('clf', model)
             ])
+        
+        elif config['model']['type'].lower() in ['logistic', 'logisticregression', 'logistic_regression']:
+            trial_params = {
+                "solver": trial.suggest_categorical("solver", config['model']['params']["solver"]),
+                "penalty": trial.suggest_categorical("penalty", config['model']['params']["penalty"]),
+                "C": trial.suggest_categorical("C", config['model']['params']["C"]),
+                "max_iter": trial.suggest_categorical("max_iter", config['model']['params']["max_iter"]),
+                "random_state": config['train']['random_state']
+            }
+            from sklearn.linear_model import LogisticRegression
+            model = LogisticRegression(**trial_params)
+            pipeline = ImbPipeline([
+                ('scaler', StandardScaler()),
+                ('smote', SMOTE(**smote_params)),
+                ('clf', model)
+            ])
+        
+        elif config['model']['type'].lower() in ['randomforest', 'randomforestclassifier']:
+            trial_params = {
+                "n_estimators": trial.suggest_categorical("n_estimators", config['model']['params']["n_estimators"]),
+                "max_depth": trial.suggest_categorical("max_depth", config['model']['params']["max_depth"]),
+                "min_samples_split": trial.suggest_categorical("min_samples_split", config['model']['params']["min_samples_split"]),
+                "min_samples_leaf": trial.suggest_categorical("min_samples_leaf", config['model']['params']["min_samples_leaf"]),
+                "max_features": trial.suggest_categorical("max_features", config['model']['params']["max_features"]),
+                "random_state": config['train']['random_state']
+            }
+            # Parâmetros opcionais
+            if "criterion" in config['model']['params']:
+                trial_params["criterion"] = trial.suggest_categorical("criterion", config['model']['params']["criterion"])
+            if "bootstrap" in config['model']['params']:
+                trial_params["bootstrap"] = trial.suggest_categorical("bootstrap", config['model']['params']["bootstrap"])
+            if "max_samples" in config['model']['params']:
+                trial_params["max_samples"] = trial.suggest_categorical("max_samples", config['model']['params']["max_samples"])
+            if "class_weight" in config['model']['params']:
+                trial_params["class_weight"] = trial.suggest_categorical("class_weight", config['model']['params']["class_weight"])
+            if "min_impurity_decrease" in config['model']['params']:
+                trial_params["min_impurity_decrease"] = trial.suggest_categorical("min_impurity_decrease", config['model']['params']["min_impurity_decrease"])
+            
+            from sklearn.ensemble import RandomForestClassifier
+            model = RandomForestClassifier(**trial_params)
+            pipeline = ImbPipeline([
+                ('scaler', StandardScaler()),
+                ('smote', SMOTE(**smote_params)),
+                ('clf', model)
+            ])
 
         # Cross-validation
         score = cross_val_score(
@@ -253,10 +298,19 @@ def treinar_optuna(df_dengue, target, config, init):
     # Log dos parâmetros do SMOTE escolhidos
     wandb.log({"optuna/smote_params": smote_best_params})
     
+    # Instancia o modelo final com os melhores parâmetros
     if config['model']['type'].lower() == "xgboost":
         clf = xgb.XGBClassifier(**model_best_params)
-    else:
+    elif config['model']['type'].lower() == "lightgbm":
         clf = lgb.LGBMClassifier(**model_best_params)
+    elif config['model']['type'].lower() in ['logistic', 'logisticregression', 'logistic_regression']:
+        from sklearn.linear_model import LogisticRegression
+        clf = LogisticRegression(**model_best_params)
+    elif config['model']['type'].lower() in ['randomforest', 'randomforestclassifier']:
+        from sklearn.ensemble import RandomForestClassifier
+        clf = RandomForestClassifier(**model_best_params)
+    else:
+        raise ValueError(f"Tipo de modelo '{config['model']['type']}' não suportado no Optuna")
 
     modelo = ImbPipeline([
         ('scaler', StandardScaler()),

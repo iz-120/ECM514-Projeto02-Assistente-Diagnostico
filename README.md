@@ -156,6 +156,7 @@ Os parâmetros de modelo e SMOTE declarados como listas são interpretados como 
     - Rregistra métricas, curvas de aprendizado e importância de features no Weights & Biases.
 - **`treinar_optuna(df_dengue, target, config, init)`**:
     - Utiliza otimização bayesiana (`Optuna`) para buscar hiperparâmetros.
+    - **Suporta todos os tipos de modelos**: `XGBoost`, `LightGBM`, `LogisticRegression` e `RandomForest`.
     - Lê o espaço de busca do YAML (incluindo parâmetros de SMOTE)
     - Define uma função objetivo que monta o pipeline e executa validação cruzada, maximiza o recall médio, e registra o histórico de trials e os melhores parâmetros no W&B.
 - **`treinar_nn(df_dengue, target, config, init)`** (em `nn_model.py`):
