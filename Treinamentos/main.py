@@ -19,7 +19,7 @@ init = {
 }
 
 # Seleciona experimento
-yaml_file = "nn_mlp_5"
+yaml_file = "nn_mlp_6"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
