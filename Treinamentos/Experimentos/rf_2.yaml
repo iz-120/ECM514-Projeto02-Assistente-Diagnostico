@@ -30,7 +30,7 @@ train:
   random_state: 42
 
 cross_val:
-  n_iter: 15 # número de iterações para o RandomizedSearchCV
+  n_iter: 10 # número de iterações para o RandomizedSearchCV
   n_jobs: 2
   scoring: "recall"
   refit: "recall"
