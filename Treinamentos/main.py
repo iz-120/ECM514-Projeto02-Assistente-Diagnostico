@@ -13,13 +13,13 @@ from src.nn_model import treinar_nn
 init = {
     'org_name': 'izabel-sampaio-org',
     'project_name': 'Assistente_Diagnostico_Dengue',
-    'tags': ['5%'],
+    'tags': ['20%'],
     'name': 'Dengue_v6',
-    'df_name': 'df_dengue_reduzido_5'
+    'df_name': 'df_dengue_reduzido_20'
 }
 
 # Seleciona experimento
-yaml_file = "logreg_4"
+yaml_file = "logreg_5"
 file_path = "Treinamentos/Experimentos/" + yaml_file + ".yaml"
 
 # Define o target (NÃO alterar)
