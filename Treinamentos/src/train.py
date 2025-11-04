@@ -295,8 +295,11 @@ def treinar_optuna(df_dengue, target, config, init):
         else:
             model_best_params[key] = value
     
-    # Log dos parâmetros do SMOTE escolhidos
-    wandb.log({"optuna/smote_params": smote_best_params})
+    # Log dos parâmetros do SMOTE e do modelo separadamente
+    wandb.log({
+        "optuna/smote_params": smote_best_params,
+        "optuna/model_params": model_best_params
+    })
     
     # Instancia o modelo final com os melhores parâmetros
     if config['model']['type'].lower() == "xgboost":
