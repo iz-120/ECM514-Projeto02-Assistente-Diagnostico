@@ -16,7 +16,7 @@ O acesso aos microdados será realizado de forma programática utilizando a bibl
 
 **Definição da Variável Alvo:** A variável alvo do modelo, denominada `RISCO_GRAVIDADE`, será criada a partir da coluna `CLASSI_FIN`. Ela será binária, onde o valor `1` (classe positiva) representará os casos graves (agrupando "Dengue com Sinais de Alarme" e "Dengue Grave") e o valor `0` (classe negativa) representará os casos de "Dengue" clássica, sem sinais de alarme.
 
-**Engenharia de Features:** As variáveis preditoras (_features_) incluirão os sinais e sintomas registrados na notificação que são os mais relevantes no diagnóstico de dengue e na identificação dos casos mais graves (e.g., `FEBRE`, `MIALGIA`, `VOMITO`, `PETEQUIA`), além de dados demográficos como CS_SEXO. A variável `IDADE` será calculada a partir da diferença entre a data dos primeiros sintomas (`DT_SIN_PRI`) e a data de nascimento (`DT_NASC`). Variáveis categóricas serão transformadas em formato numérico através da técnica de _One-Hot Encoding_.
+**Engenharia de Features:** As variáveis preditoras (_features_) incluirão os sinais e sintomas registrados na notificação que são os mais relevantes no diagnóstico de dengue e na identificação dos casos mais graves (e.g., `FEBRE`, `MIALGIA`, `VOMITO`, `PETEQUIA`), além de dados demográficos como CS*SEXO. A variável `IDADE` será calculada a partir da diferença entre a data dos primeiros sintomas (`DT_SIN_PRI`) e a data de nascimento (`DT_NASC`). Variáveis categóricas serão transformadas em formato numérico através da técnica de \_One-Hot Encoding*.
 
 **Tratamento de Dados:** Devido à natureza dos dados de saúde, espera-se a presença de valores ausentes, especialmente nos sintomas, os quais não são de preenchimento obrigatório na Ficha Individual de Notificação (FIN) do SINAN. Em consulta a uma profissional da área, os campos de sintomas vazios indicam a ausência do sintoma em questão e deixa de ser preenchido com “não” por praticidade. Dada a provável desproporção entre casos graves e não graves, o desbalanceamento de classes será mitigado no conjunto de treinamento utilizando a técnica SMOTE (_Synthetic Minority Over-sampling Technique_), que cria amostras sintéticas da classe minoritária para equilibrar a distribuição dos dados.
 
@@ -30,7 +30,7 @@ Para a tarefa de classificação, serão avaliados e comparados múltiplos algor
 
 - **XGBoost (_Extreme Gradient Boosting_):** Um algoritmo de _Gradient Boosting_ altamente otimizado e eficiente, que frequentemente apresenta performance de ponta em competições e aplicações com dados tabulares.
 
-- **MLP:** PREENCHER
+- **MLP (_Multi-Layer Perceptron_):** Uma rede neural artificial composta por múltiplas camadas de neurônios, capaz de aprender representações não-lineares complexas dos dados através de retropropagação, sendo adequada para problemas de classificação com padrões singulares.
 
 Os dados serão divididos em conjuntos de treinamento (80%) e teste (20%). O ajuste de hiperparâmetros dos modelos será realizado utilizando a técnica de validação cruzada (_cross-validation_) no conjunto de treinamento para evitar superajuste (_overfitting_) e garantir a generalização do modelo.
 
@@ -148,20 +148,20 @@ Os parâmetros de modelo e SMOTE declarados como listas são interpretados como 
 **`train.py`** – Implementa três funções principais de treinamento:
 
 - **`treinar_gridsearch(df_dengue, target, config, init)`**:
-    - Executa busca exaustiva (`GridSearchCV`) ou aleatória (`RandomizedSearchCV`) de hiperparâmetros.
-    - Constrói um pipeline imbalanced-learn (`StandardScaler` → `SMOTE` → classificador)
-    - Aplica validação cruzada
-    - Treina o melhor modelo
-    - Avalia no conjunto de teste
-    - Rregistra métricas, curvas de aprendizado e importância de features no Weights & Biases.
+  - Executa busca exaustiva (`GridSearchCV`) ou aleatória (`RandomizedSearchCV`) de hiperparâmetros.
+  - Constrói um pipeline imbalanced-learn (`StandardScaler` → `SMOTE` → classificador)
+  - Aplica validação cruzada
+  - Treina o melhor modelo
+  - Avalia no conjunto de teste
+  - Rregistra métricas, curvas de aprendizado e importância de features no Weights & Biases.
 - **`treinar_optuna(df_dengue, target, config, init)`**:
-    - Utiliza otimização bayesiana (`Optuna`) para buscar hiperparâmetros.
-    - **Suporta todos os tipos de modelos**: `XGBoost`, `LightGBM`, `LogisticRegression` e `RandomForest`.
-    - Lê o espaço de busca do YAML (incluindo parâmetros de SMOTE)
-    - Define uma função objetivo que monta o pipeline e executa validação cruzada, maximiza o recall médio, e registra o histórico de trials e os melhores parâmetros no W&B.
+  - Utiliza otimização bayesiana (`Optuna`) para buscar hiperparâmetros.
+  - **Suporta todos os tipos de modelos**: `XGBoost`, `LightGBM`, `LogisticRegression` e `RandomForest`.
+  - Lê o espaço de busca do YAML (incluindo parâmetros de SMOTE)
+  - Define uma função objetivo que monta o pipeline e executa validação cruzada, maximiza o recall médio, e registra o histórico de trials e os melhores parâmetros no W&B.
 - **`treinar_nn(df_dengue, target, config, init)`** (em `nn_model.py`):
-    - Implementa treinamento de redes neurais MLP (Multi-Layer Perceptron) com suporte a validação cruzada manual, `GridSearchCV` ou `Optuna`.
-    - O pipeline inclui `SimpleImputer` → `MinMaxScaler` → `SMOTE` → `MLPClassifier`, e logs detalhados de recall por fold.
+  - Implementa treinamento de redes neurais MLP (Multi-Layer Perceptron) com suporte a validação cruzada manual, `GridSearchCV` ou `Optuna`.
+  - O pipeline inclui `SimpleImputer` → `MinMaxScaler` → `SMOTE` → `MLPClassifier`, e logs detalhados de recall por fold.
 
 **`models.py`** – Contém a fábrica de modelos (`criar_modelo`) que instancia o classificador base a partir do tipo declarado no YAML (`RandomForest`, `LogisticRegression`, `XGBoost`, `LightGBM`), e a função `aplica_parametros`, que envolve o modelo em um pipeline imbalanced-learn com `StandardScaler` e `SMOTE`, e aplica `GridSearchCV`/`RandomizedSearchCV` quando `param_format` for especificado. Os parâmetros de busca são prefixados com `clf__` (para o classificador) e `smote__` (para o SMOTE), permitindo que o método de busca otimize ambos simultaneamente.
 
@@ -197,6 +197,7 @@ Insira sua chave de API quando solicitado. Alternativamente, descomente e edite 
 Abra o arquivo `main.py` e ajuste as variáveis de configuração.
 
 Vale notar que:
+
 - `org_name`: Se mantido o atual, a run será logada na org de desenvolvimento
 - O número em `df_name` representa o % de recorte do dataset original. Foram feitos recortes para otimizar o tempo de execução das runs
 
@@ -204,7 +205,7 @@ Vale notar que:
 
 ```python
 init = {
-    'org_name': 'seu_usuario_ou_org',          # Nome do usuário ou organização no W&B 
+    'org_name': 'seu_usuario_ou_org',          # Nome do usuário ou organização no W&B
     'project_name': 'Assistente_Diagnostico_Dengue',
     'tags': ['5%'],                            # Tags para filtrar runs
     'name': 'Dengue_v6',                       # Nome único do run
