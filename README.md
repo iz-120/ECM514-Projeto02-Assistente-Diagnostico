@@ -30,7 +30,7 @@ Para a tarefa de classificação, serão avaliados e comparados múltiplos algor
 
 - **XGBoost (_Extreme Gradient Boosting_):** Um algoritmo de _Gradient Boosting_ altamente otimizado e eficiente, que frequentemente apresenta performance de ponta em competições e aplicações com dados tabulares.
 
-- **MLP (_Multi-Layer Perceptron_):** Uma rede neural artificial composta por múltiplas camadas de neurônios, capaz de aprender representações não-lineares complexas dos dados através de retropropagação, sendo adequada para problemas de classificação com padrões singulares.
+- **MLP (_Multi-Layer Perceptron_):** Uma rede neural artificial composta por múltiplas camadas de neurônios, capaz de aprender representações não-lineares complexas dos dados através de retropropagação, sendo adequada para problemas de classificação com padrões complexos.
 
 Os dados serão divididos em conjuntos de treinamento (80%) e teste (20%). O ajuste de hiperparâmetros dos modelos será realizado utilizando a técnica de validação cruzada (_cross-validation_) no conjunto de treinamento para evitar superajuste (_overfitting_) e garantir a generalização do modelo.
 
