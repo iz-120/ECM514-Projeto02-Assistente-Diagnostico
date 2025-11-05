@@ -140,11 +140,11 @@ if botao_predicao and model_pipeline is not None and shap_explainer is not None 
     if predicao == 1:
         col1.error("**ALERTA: Alto Risco de Gravidade**")
         col2.metric(label="Score de Risco (Prob. de Agravamento)", value=f"{probabilidade * 100:.1f}%")
-        col1.markdown("Recomenda-se observação clínica intensiva e hidratação venosa, conforme protocolos (Grupo C/D).")
+        col1.markdown("Recomenda-se observação clínica intensiva e hidratação venosa, conforme protocolos (Grupo B/C/D).")
     else:
         col1.success("**Resultado: Baixo Risco de Gravidade**")
         col2.metric(label="Score de Risco (Prob. de Agravamento)", value=f"{probabilidade * 100:.1f}%")
-        col1.markdown("Recomenda-se tratamento ambulatorial com hidratação oral e acompanhamento (Grupo A/B).")
+        col1.markdown("Recomenda-se tratamento ambulatorial com hidratação oral e acompanhamento (Grupo A).")
     
     st.markdown("---")
     
