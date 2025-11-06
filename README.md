@@ -2,6 +2,10 @@
 
 Projeto da disciplina de Ciência de Dados e Inteligência Artificial focado em Machine Learning. O caso de estudo é desenvolver um assistente de diagnóstico de casos graves de dengue.
 
+## Apresentação
+
+Assista a apresentação do projeto através deste [link](https://youtu.be/1r8-WHmzlQ4).
+
 ## Metodologia
 
 ### Fonte de dados
